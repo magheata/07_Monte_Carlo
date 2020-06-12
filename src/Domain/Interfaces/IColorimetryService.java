@@ -7,7 +7,7 @@ import Domain.FlagColors;
 import java.awt.image.BufferedImage;
 
 public interface IColorimetryService {
-    FlagColors findColorPercentages(BufferedImage image);
+    FlagColors findColorPercentages(String flagImagePath, BufferedImage image);
     void findColorPercentagesMonteCarlo();
     Color getPixelColor(int r, int g, int b);
 }

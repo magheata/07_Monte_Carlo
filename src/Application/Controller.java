@@ -6,9 +6,9 @@ import Domain.FlagColors;
 import Domain.Interfaces.IController;
 import Infrastructure.ColorimetryService.ColorimetryService;
 import Infrastructure.DB.DBManager;
+import Presentation.Window;
 
 import javax.imageio.ImageIO;
-import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,7 +18,9 @@ public class Controller implements IController {
 
     private ColorimetryService colorimetryService;
     private DBManager dbManager;
-    private PropertyChangeSupport changes = new PropertyChangeSupport(this);
+    private Window window;
+
+    private boolean useProbabilisticAlgorithm = false;
 
     public Controller() {
         colorimetryService = new ColorimetryService();
@@ -27,7 +29,7 @@ public class Controller implements IController {
             dbManager.insertValuesIntoCountryTable();
         }
         loadFlagsTable();
-        changes.firePropertyChange("tablaCreada", false, true);
+        window = new Window(this);
     }
 
     @Override
@@ -38,9 +40,9 @@ public class Controller implements IController {
             Iterator it = countryFlags.iterator();
             while (it.hasNext()){
                 String flagImage = (String) it.next();
-                FlagColors flagColors = findColorPercentageOfImage(flagImage);
+                FlagColors flagColors = findColorPercentageOfImage(Constants.USER_PATH + "/flags/" + flagImage);
                 if (flagColors != null){
-                    dbManager.insertValuesIntroFlafTable(flagImage, flagColors.getRed(), flagColors.getOrange(),
+                    dbManager.insertValuesIntoFlagTable(flagImage, flagColors.getRed(), flagColors.getOrange(),
                             flagColors.getYellow(), flagColors.getGreen_1(), flagColors.getGreen_2(), flagColors.getGreen_3(),
                             flagColors.getBlue_1(), flagColors.getBlue_2(), flagColors.getBlue_3(), flagColors.getIndigo(),
                             flagColors.getPink(), flagColors.getMagenta(), flagColors.getBlack(), flagColors.getWhite());
@@ -53,10 +55,32 @@ public class Controller implements IController {
     public FlagColors findColorPercentageOfImage(String fileName) {
         try {
             if (!fileName.isEmpty()){
-                return colorimetryService.findColorPercentages(ImageIO.read(new File(Constants.USER_PATH + "/flags/" + fileName)));
+                return colorimetryService.findColorPercentages(fileName, ImageIO.read(new File(fileName)));
             }
         } catch (IOException e) {
         }
         return null;
+    }
+
+    public void closeConnection() {
+        dbManager.closeConnection();
+    }
+
+    public void getCountryForFlag(FlagColors selectedFlag){
+        ArrayList<String> flags = new ArrayList<>();
+        int margin = 5;
+        while (flags.isEmpty()){
+            flags = dbManager.getFlagsWithinRange(margin, selectedFlag.getRed(), selectedFlag.getOrange(), selectedFlag.getYellow(), selectedFlag.getGreen_1(),
+                    selectedFlag.getGreen_2(), selectedFlag.getGreen_3(), selectedFlag.getBlue_1(), selectedFlag.getBlue_2(), selectedFlag.getBlue_3(),
+                    selectedFlag.getIndigo(), selectedFlag.getPink(), selectedFlag.getMagenta(), selectedFlag.getBlack(), selectedFlag.getWhite());
+            if (flags.isEmpty()){
+                margin++;
+            }
+        }
+        System.out.println(flags);
+    }
+
+    public void setUseProbabilisticAlgorithm(boolean useProbabilisticAlgorithm) {
+        this.useProbabilisticAlgorithm = useProbabilisticAlgorithm;
     }
 }

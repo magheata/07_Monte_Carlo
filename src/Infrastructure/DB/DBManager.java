@@ -76,8 +76,8 @@ public class DBManager {
         }
     }
 
-    public void insertValuesIntroFlafTable(String flag, float red, float orange, float yellow, float green_1, float green_2, float green_3, float blue_1,
-                                           float blue_2, float blue_3, float indigo, float pink, float magenta, float black, float white){
+    public void insertValuesIntoFlagTable(String flag, float red, float orange, float yellow, float green_1, float green_2, float green_3, float blue_1,
+                                          float blue_2, float blue_3, float indigo, float pink, float magenta, float black, float white){
         try {
             Statement stmt = con.createStatement();
             stmt.executeUpdate("INSERT INTO " + Constants.TABLE_FLAGS + "(flag, red, orange, yellow, green_1, green_2, green_3, blue_1, blue_2, blue_3, indigo, pink, magenta, black, white) " +
@@ -113,6 +113,7 @@ public class DBManager {
             while (countryIterator.hasNext() && codesIterator.hasNext()){
                 stmt.executeUpdate(insertIntoCountryTableQuery((String) countryIterator.next(), (String) codesIterator.next()));
             }
+            selectAllFromCountryTable();
             stmt.close();
         }
         catch( SQLException e ) { }
@@ -209,4 +210,44 @@ public class DBManager {
         }
         return values;
     }
+
+    public void closeConnection() {
+        try {
+            con.close();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
+public ArrayList<String> getFlagsWithinRange(int margin, float red, float orange, float yellow, float green_1, float green_2, float green_3, float blue_1, float blue_2,
+                                    float blue_3, float indigo, float pink, float magenta, float black, float white){
+        Statement stmt;
+        ArrayList<String> flags = new ArrayList<>();
+        try {
+            stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT * FROM "+ Constants.TABLE_FLAGS + " " +
+                    "WHERE (red >= " + (red - margin) + " AND red <= " + (red + margin) + ")" +
+                    "AND (orange >= " + (orange - margin) + " AND orange <= " + (orange + margin) + ") " +
+                    "AND (yellow >= " + (yellow - margin) + " AND yellow <= " + (yellow + margin) + ") " +
+                    "AND (green_1 >= " + (green_1 - margin) + " AND green_1 <= " + (green_1 + margin) + ") " +
+                    "AND (green_2 >= " + (green_2 - margin) + " AND green_2 <= " + (green_2 + margin) + ") " +
+                    "AND (green_3 >= " + (green_3 - margin) + " AND green_3 <= " + (green_3 + margin) + ") " +
+                    "AND (blue_1 >= " + (blue_1 - margin) + " AND blue_1 <= " + (blue_1 + margin) + ") " +
+                    "AND (blue_2 >= " + (blue_2 - margin) + " AND blue_2 <= " + (blue_2 + margin) + ") " +
+                    "AND (blue_3 >= " + (blue_3 - margin) + " AND blue_3 <= " + (blue_3 + margin) + ") " +
+                    "AND (indigo >= " + (indigo - margin) + " AND indigo <= " + (indigo + margin) + ") " +
+                    "AND (pink >= " + (pink - margin) + " AND pink <= " + (pink + margin) + ") " +
+                    "AND (magenta >= " + (magenta - margin) + " AND magenta <= " + (magenta + margin) + ") " +
+                    "AND (black >= " + (black - margin) + " AND black <= " + (black + margin) + ") " +
+                    "AND (white >= " + (white - margin) + " AND white <= " + (white + margin) + ") ;");
+            while(rs.next())
+            {
+                flags.add(rs.getString("flag"));
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return flags;
+    }
+
+
 }

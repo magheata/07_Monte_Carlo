@@ -3,6 +3,7 @@ package Config;
 
 import Domain.Color;
 
+import java.awt.*;
 import java.io.File;
 import java.util.AbstractMap;
 import java.util.Map;
@@ -23,6 +24,18 @@ import java.util.Map;
  */
 
 public class Constants {
+
+    public static final int WIDTH_WINDOW = 600;
+    public static final int HEIGHT_WINDOW = 550;
+    public static final int WIDTH_CONTROL_PANEL = 600;
+    public static final int HEIGHT_CONTROL_PANEL = 150;
+    public static final int WIDTH_FILE_PANEL = 600;
+    public static final int HEIGHT_FILE_PANEL = 400;
+
+    public static final Dimension DIM_WINDOW = new Dimension(WIDTH_WINDOW, HEIGHT_WINDOW);
+    public static final Dimension DIM_CONTROL_PANEL = new Dimension(WIDTH_CONTROL_PANEL, HEIGHT_CONTROL_PANEL);
+    public static final Dimension DIM_FILE_PANEL = new Dimension(WIDTH_FILE_PANEL, HEIGHT_FILE_PANEL);
+
     public static final int COLOR_MARGIN = 15;
 
     public static final int HSB_RED = 0;

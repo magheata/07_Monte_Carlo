@@ -2,6 +2,7 @@
 package Domain;
 
 public class FlagColors {
+    private String flagImagePath;
     private float red;
     private float orange;
     private float yellow;
@@ -17,7 +18,8 @@ public class FlagColors {
     private float black;
     private float white;
 
-    public FlagColors(float red, float orange, float yellow, float green_1, float green_2, float green_3, float blue_1, float blue_2, float blue_3, float indigo, float pink, float magenta, float black, float white) {
+    public FlagColors(String flagImagePath, float red, float orange, float yellow, float green_1, float green_2, float green_3, float blue_1, float blue_2, float blue_3, float indigo, float pink, float magenta, float black, float white) {
+        this.flagImagePath = flagImagePath;
         this.red = red;
         this.orange = orange;
         this.yellow = yellow;
@@ -40,6 +42,26 @@ public class FlagColors {
 
     public float getOrange() {
         return orange;
+    }
+
+    @Override
+    public String toString() {
+        return "FlagColors{" +
+                "red=" + red +
+                ", orange=" + orange +
+                ", yellow=" + yellow +
+                ", green_1=" + green_1 +
+                ", green_2=" + green_2 +
+                ", green_3=" + green_3 +
+                ", blue_1=" + blue_1 +
+                ", blue_2=" + blue_2 +
+                ", blue_3=" + blue_3 +
+                ", indigo=" + indigo +
+                ", pink=" + pink +
+                ", magenta=" + magenta +
+                ", black=" + black +
+                ", white=" + white +
+                '}';
     }
 
     public float getYellow() {

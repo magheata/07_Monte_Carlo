@@ -1,6 +1,9 @@
-2020-06-12 14:19:16 jdbc[3]: exception
+2020-06-12 16:30:39 jdbc[3]: exception
 org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "COUNTRY" not found; SQL statement:
 SELECT * FROM country [42102-200]
-2020-06-12 14:19:16 jdbc[3]: exception
+2020-06-12 16:30:40 jdbc[3]: exception
 org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "FLAGSCOLORIMETRY" not found; SQL statement:
 SELECT * FROM flagsColorimetry [42102-200]
+2020-06-12 16:47:16 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "SELECT * FROM FLAGSCOLORIMETRY WHERE (RED >= 15.22921371459961 AND RED <= 18.22921371459961)AND (YELLOW >= 28.419570922851562 AND YELLOW <= 31.419570922851562AND (BLUE_1 >= -1.4976057037711143 AND BLUE_1 <= 1.5023942962288857) ;[*]"; expected "[, ::, AT, FORMAT, *, /, %, +, -, ||, ~, !~, NOT, LIKE, ILIKE, REGEXP, IS, IN, BETWEEN, AND, OR, ,, )"; SQL statement:
+SELECT * FROM flagsColorimetry WHERE (red >= 15.22921371459961 AND red <= 18.22921371459961)AND (yellow >= 28.419570922851562 AND yellow <= 31.419570922851562AND (blue_1 >= -1.4976057037711143 AND blue_1 <= 1.5023942962288857) ; [42001-200]

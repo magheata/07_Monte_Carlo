@@ -20,7 +20,7 @@ public class ColorimetryService implements IColorimetryService {
 
     // "Tradicional"
     @Override
-    public FlagColors findColorPercentages(BufferedImage image){
+    public FlagColors findColorPercentages(String flagImagePath, BufferedImage image){
         float redCount = 0,
                 orangeCount = 0,
                 yellowCount = 0,
@@ -93,7 +93,8 @@ public class ColorimetryService implements IColorimetryService {
             }
         }
 
-        return new FlagColors(getColorPercentage(redCount),
+        return new FlagColors(flagImagePath,
+                getColorPercentage(redCount),
                 getColorPercentage(orangeCount),
                 getColorPercentage(yellowCount),
                 getColorPercentage(green1Count),
