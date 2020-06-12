@@ -26,6 +26,7 @@ public class Controller implements IController {
         if (!dbManager.tableExists(Constants.TABLE_COUNTRY)){
             dbManager.insertValuesIntoCountryTable();
         }
+        loadFlagsTable();
         changes.firePropertyChange("tablaCreada", false, true);
     }
 

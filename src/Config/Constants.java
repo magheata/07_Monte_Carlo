@@ -5,7 +5,6 @@ import Domain.Color;
 
 import java.io.File;
 import java.util.AbstractMap;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -54,7 +53,6 @@ public class Constants {
             new AbstractMap.SimpleEntry<>(HSB_MAGENTA, Color.MAGENTA)
             );
 
-    public static final int ERROR_CODE_TABLE_EXISTS = 42101;
     public static final int ERROR_CODE_TABLE_NOT_FOUND = 42102;
 
     public static final int [] HSB_PALETTE = new int[]{
@@ -74,5 +72,4 @@ public class Constants {
 
     public static final String TABLE_COUNTRY = "country";
     public static final String TABLE_FLAGS = "flagsColorimetry";
-
 }

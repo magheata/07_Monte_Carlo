@@ -1,6 +1,6 @@
-2020-06-12 14:14:41 jdbc[3]: exception
+2020-06-12 14:19:16 jdbc[3]: exception
 org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "COUNTRY" not found; SQL statement:
 SELECT * FROM country [42102-200]
-2020-06-12 14:14:41 jdbc[3]: exception
+2020-06-12 14:19:16 jdbc[3]: exception
 org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "FLAGSCOLORIMETRY" not found; SQL statement:
 SELECT * FROM flagsColorimetry [42102-200]
