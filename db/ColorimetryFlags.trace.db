@@ -1,0 +1,93 @@
+2020-06-11 16:36:40 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Column "USER" not found; SQL statement:
+INSERT INTO country ( user ) VALUES ( 'Claudio', 'claudio.png') [42122-200]
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:453)
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:429)
+	at org.h2.message.DbException.get(DbException.java:205)
+	at org.h2.message.DbException.get(DbException.java:181)
+	at org.h2.table.Table.getColumn(Table.java:703)
+	at org.h2.command.Parser.parseColumn(Parser.java:1450)
+	at org.h2.command.Parser.parseColumnList(Parser.java:1435)
+	at org.h2.command.Parser.parseInsertGivenTable(Parser.java:1804)
+	at org.h2.command.Parser.parseInsert(Parser.java:1749)
+	at org.h2.command.Parser.parsePrepared(Parser.java:954)
+	at org.h2.command.Parser.parse(Parser.java:843)
+	at org.h2.command.Parser.parse(Parser.java:815)
+	at org.h2.command.Parser.prepareCommand(Parser.java:738)
+	at org.h2.engine.Session.prepareLocal(Session.java:657)
+	at org.h2.engine.Session.prepareCommand(Session.java:595)
+	at org.h2.jdbc.JdbcConnection.prepareCommand(JdbcConnection.java:1235)
+	at org.h2.jdbc.JdbcStatement.executeUpdateInternal(JdbcStatement.java:164)
+	at org.h2.jdbc.JdbcStatement.executeUpdate(JdbcStatement.java:126)
+	at Infrastructure.Start.main(Start.java:25)
+2020-06-11 16:37:03 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "COUNTRY" already exists; SQL statement:
+CREATE TABLE country ( country varchar(50), flag_img varchar(50) ) [42101-200]
+2020-06-11 16:37:11 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Column "user" not found [42122-200]
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:453)
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:429)
+	at org.h2.message.DbException.get(DbException.java:205)
+	at org.h2.message.DbException.get(DbException.java:181)
+	at org.h2.jdbc.JdbcResultSet.getColumnIndex(JdbcResultSet.java:3195)
+	at org.h2.jdbc.JdbcResultSet.get(JdbcResultSet.java:3268)
+	at org.h2.jdbc.JdbcResultSet.getString(JdbcResultSet.java:316)
+	at Infrastructure.Start.main(Start.java:30)
+2020-06-12 10:13:23 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "TABLE1" not found; SQL statement:
+DROP TABLE table1 [42102-200]
+2020-06-12 10:21:30 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "COUNTRY" already exists; SQL statement:
+CREATE TABLE country ( country varchar(50), code char(2) ) [42101-200]
+2020-06-12 10:22:28 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "INSERT INTO country ( country, code ) VALUES ( 'Côte d'Ivoire', 'CI[*]' )"; SQL statement:
+INSERT INTO country ( country, code ) VALUES ( 'Côte d'Ivoire', 'CI' ) [42000-200]
+2020-06-12 10:22:47 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "INSERT INTO country ( country, code ) VALUES ( 'Côte d'Ivoire', 'CI[*]' )"; SQL statement:
+INSERT INTO country ( country, code ) VALUES ( 'Côte d'Ivoire', 'CI' ) [42000-200]
+2020-06-12 10:23:52 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLDataException: Value too long for column "COUNTRY VARCHAR(50)": "'United Kingdom of Great Britain and Northern Ireland' (52)"; SQL statement:
+INSERT INTO country ( country, code ) VALUES ( 'United Kingdom of Great Britain and Northern Ireland', 'GB' ) [22001-200]
+2020-06-12 10:24:22 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "INSERT INTO country ( country, code ) VALUES ( 'Côte d'Ivoire', 'CI[*]' )"; SQL statement:
+INSERT INTO country ( country, code ) VALUES ( 'Côte d'Ivoire', 'CI' ) [42000-200]
+2020-06-12 10:25:14 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "INSERT INTO country ( country, code ) VALUES ( 'Lao People's Democratic Republic', 'LA[*]' )"; SQL statement:
+INSERT INTO country ( country, code ) VALUES ( 'Lao People's Democratic Republic', 'LA' ) [42000-200]
+2020-06-12 10:30:04 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "COUNTRY" already exists; SQL statement:
+CREATE TABLE country ( country varchar (100), code varchar (2), flag varchar(6) ) [42101-200]
+2020-06-12 10:30:19 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "COUNTRY" already exists; SQL statement:
+CREATE TABLE country ( country varchar (100), code varchar (2), flag varchar(6) ) [42101-200]
+2020-06-12 10:31:15 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "COUNTRY" not found; SQL statement:
+INSERT INTO country ( country, code, flag) VALUES ( 'Andorra', 'AD' , 'ad.png') [42102-200]
+2020-06-12 10:31:20 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "COUNTRY" not found; SQL statement:
+DROP TABLE country [42102-200]
+2020-06-12 10:55:24 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "COUNTRY" not found; SQL statement:
+DROP TABLE country [42102-200]
+2020-06-12 10:56:37 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "COUNTRY" not found; SQL statement:
+INSERT INTO country ( country, code, flag) VALUES ( 'Andorra', 'AD' , 'ad.png') [42102-200]
+2020-06-12 10:57:24 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "COUNTRY" not found; SQL statement:
+INSERT INTO country ( country, code, flag) VALUES ( 'Andorra', 'AD' , 'ad.png') [42102-200]
+2020-06-12 12:24:55 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLNonTransientConnectionException: The database is open in exclusive mode; can not open additional connections [90135-200]
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:622)
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:429)
+	at org.h2.message.DbException.get(DbException.java:205)
+	at org.h2.message.DbException.get(DbException.java:181)
+	at org.h2.message.DbException.get(DbException.java:170)
+	at org.h2.engine.Session.checkSuspended(Session.java:1369)
+	at org.h2.engine.Session.transitionToState(Session.java:1361)
+	at org.h2.engine.Session.setCurrentCommand(Session.java:1343)
+	at org.h2.engine.Session.endStatement(Session.java:1887)
+	at org.h2.command.Command.executeUpdate(Command.java:285)
+	at org.h2.jdbc.JdbcStatement.executeUpdateInternal(JdbcStatement.java:168)
+	at org.h2.jdbc.JdbcStatement.executeUpdate(JdbcStatement.java:126)
+	at Infrastructure.DB.DBManager.insertValuesIntoCountryTable(DBManager.java:36)
+	at Infrastructure.Start.main(Start.java:21)

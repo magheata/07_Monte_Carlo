@@ -1,0 +1,3 @@
+2020-06-11 16:34:27 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "TABLE1" not found; SQL statement:
+DROP TABLE table1 [42102-200]
