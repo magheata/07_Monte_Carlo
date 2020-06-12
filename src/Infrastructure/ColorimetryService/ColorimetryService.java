@@ -3,37 +3,24 @@ package Infrastructure.ColorimetryService;
 
 import Config.Constants;
 import Domain.Color;
+import Domain.FlagColors;
 import Domain.HSBColor;
 import Domain.Interfaces.IColorimetryService;
 
 import java.awt.image.BufferedImage;
 
-/**
- * 0 - RED
- * 30 - ORANGE
- * 60 - YELLOW
- * 90 - GREEN 1
- * 120 - GREEN 2
- * 150 - GREEN 3
- * 180 - BLUE 1
- * 210 - BLUE 2
- * 240 - BLUE 3
- * 270 - INDIGO
- * 300 - PINK
- * 330 - MAGENTA
- */
-
 public class ColorimetryService implements IColorimetryService {
 
     private HSBConverter hsbConverter;
 
+    private int totalPixels;
     public ColorimetryService(){
         hsbConverter = new HSBConverter();
     }
 
     // "Tradicional"
     @Override
-    public void findColorPercentages(BufferedImage image){
+    public FlagColors findColorPercentages(BufferedImage image){
         float redCount = 0,
                 orangeCount = 0,
                 yellowCount = 0,
@@ -48,7 +35,8 @@ public class ColorimetryService implements IColorimetryService {
                 magentaCount = 0,
                 whiteCount = 0,
                 blackCount = 0;
-        int totalPixels = image.getWidth() * image.getHeight();
+
+        totalPixels = image.getWidth() * image.getHeight();
 
         for (int x = 0; x < image.getWidth(); x++){
             for (int y = 0; y < image.getHeight(); y++){
@@ -105,36 +93,24 @@ public class ColorimetryService implements IColorimetryService {
             }
         }
 
-        if (redCount != 0){
-            System.out.println("Red percentage:" + ((redCount / totalPixels) * 100) );
-        }
-        if (orangeCount != 0){
-            System.out.println("Orange percentage:" + ((orangeCount / totalPixels) * 100) );
-        }
-        if (yellowCount != 0){
-            System.out.println("Yellow percentage:" + ((yellowCount / totalPixels) * 100) );
-        }
-        if (blue1Count != 0 || blue2Count != 0 || blue3Count != 0){
-            System.out.println("Blue percentage:" + (((blue1Count + blue2Count + blue3Count) / totalPixels) * 100) );
-        }
-        if (green1Count != 0 || green2Count != 0 || green3Count != 0){
-            System.out.println("Green percentage:" + (((green1Count + green2Count + green3Count) / totalPixels) * 100) );
-        }
-        if (indigoCount != 0){
-            System.out.println("Indigo percentage:" + ((indigoCount / totalPixels) * 100) );
-        }
-        if (pinkCount != 0){
-            System.out.println("Pink percentage:" + ((pinkCount / totalPixels) * 100) );
-        }
-        if (magentaCount != 0){
-            System.out.println("Magenta percentage:" + ((magentaCount / totalPixels) * 100) );
-        }
-        if (whiteCount != 0){
-            System.out.println("White percentage:" + ((whiteCount / totalPixels) * 100) );
-        }
-        if (blackCount != 0){
-            System.out.println("Black percentage:" + ((blackCount / totalPixels) * 100) );
-        }
+        return new FlagColors(getColorPercentage(redCount),
+                getColorPercentage(orangeCount),
+                getColorPercentage(yellowCount),
+                getColorPercentage(green1Count),
+                getColorPercentage(green2Count),
+                getColorPercentage(green3Count),
+                getColorPercentage(blue1Count),
+                getColorPercentage(blue2Count),
+                getColorPercentage(blue3Count),
+                getColorPercentage(indigoCount),
+                getColorPercentage(pinkCount),
+                getColorPercentage(magentaCount),
+                getColorPercentage(blackCount),
+                getColorPercentage(whiteCount));
+    }
+
+    private float getColorPercentage(float colorPixels){
+        return (colorPixels / totalPixels) * 100;
     }
 
     @Override

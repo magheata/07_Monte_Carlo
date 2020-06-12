@@ -73,5 +73,6 @@ public class Constants {
     public static final String FILE_COUNTRY_CODES = "country_codes.txt";
 
     public static final String TABLE_COUNTRY = "country";
+    public static final String TABLE_FLAGS = "flagsColorimetry";
 
 }

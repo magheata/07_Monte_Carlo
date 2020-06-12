@@ -2,11 +2,12 @@
 package Domain.Interfaces;
 
 import Domain.Color;
+import Domain.FlagColors;
 
 import java.awt.image.BufferedImage;
 
 public interface IColorimetryService {
-    void findColorPercentages(BufferedImage image);
+    FlagColors findColorPercentages(BufferedImage image);
     void findColorPercentagesMonteCarlo();
 
     Color getPixelColor(int r, int g, int b);

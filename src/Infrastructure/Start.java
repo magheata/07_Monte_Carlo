@@ -3,12 +3,6 @@ package Infrastructure;
 
 import Infrastructure.DB.DBManager;
 
-import java.io.File;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
-
 public class Start {
     /**
      * @param args
