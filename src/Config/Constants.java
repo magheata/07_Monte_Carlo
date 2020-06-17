@@ -26,15 +26,27 @@ import java.util.Map;
 public class Constants {
 
     public static final int WIDTH_WINDOW = 600;
-    public static final int HEIGHT_WINDOW = 550;
+    public static final int HEIGHT_WINDOW = 650;
     public static final int WIDTH_CONTROL_PANEL = 600;
-    public static final int HEIGHT_CONTROL_PANEL = 150;
+    public static final int HEIGHT_CONTROL_PANEL = 200;
     public static final int WIDTH_FILE_PANEL = 600;
     public static final int HEIGHT_FILE_PANEL = 400;
+
+    public static final int WIDTH_ITERATIONS_PANEL = 600;
+    public static final int HEIGHT_ITERATIONS_PANEL = 50;
+
+    public static final int WIDTH_SAMPLES_PANEL = 600;
+    public static final int HEIGHT_SAMPLES_PANEL = 50;
+
+    public static final int WIDTH_SLIDER = 300;
+    public static final int HEIGHT_SLIDER = 50;
 
     public static final Dimension DIM_WINDOW = new Dimension(WIDTH_WINDOW, HEIGHT_WINDOW);
     public static final Dimension DIM_CONTROL_PANEL = new Dimension(WIDTH_CONTROL_PANEL, HEIGHT_CONTROL_PANEL);
     public static final Dimension DIM_FILE_PANEL = new Dimension(WIDTH_FILE_PANEL, HEIGHT_FILE_PANEL);
+    public static final Dimension DIM_ITERATIONS_PANEL = new Dimension(WIDTH_ITERATIONS_PANEL, HEIGHT_ITERATIONS_PANEL);
+    public static final Dimension DIM_SAMPLES_PANEL = new Dimension(WIDTH_SAMPLES_PANEL, HEIGHT_SAMPLES_PANEL);
+    public static final Dimension DIM_SLIDER = new Dimension(WIDTH_SLIDER, HEIGHT_SLIDER);
 
     public static final int COLOR_MARGIN = 15;
 
@@ -85,4 +97,11 @@ public class Constants {
 
     public static final String TABLE_COUNTRY = "country";
     public static final String TABLE_FLAGS = "flagsColorimetry";
+
+    public static final String TEXT_TRY_AGAIN_BUTTON = "Try again with another flag";
+    public static final String TEXT_FIND_COUNTRY_BUTTON = "Find flag's country";
+
+    public static final Font FONT_LABEL = new Font("Sans", Font.BOLD, 90);
+    public static final Font FONT_SMALL_LABEL = new Font("Sans", Font.BOLD, 40);
+
 }

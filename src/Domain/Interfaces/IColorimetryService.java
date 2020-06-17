@@ -8,6 +8,6 @@ import java.awt.image.BufferedImage;
 
 public interface IColorimetryService {
     FlagColors findColorPercentages(String flagImagePath, BufferedImage image);
-    void findColorPercentagesMonteCarlo();
+    FlagColors findColorPercentagesMonteCarlo(String flagImagePath, BufferedImage image, int samples);
     Color getPixelColor(int r, int g, int b);
 }

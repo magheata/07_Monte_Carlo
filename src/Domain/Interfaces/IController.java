@@ -5,4 +5,7 @@ import Domain.FlagColors;
 public interface IController {
     void loadFlagsTable();
     FlagColors findColorPercentageOfImage(String path);
+    String getCountryForFlag(String flagPath, int iterations, int samples);
+
+    void closeConnection();
 }

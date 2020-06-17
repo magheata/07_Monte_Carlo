@@ -111,4 +111,9 @@ public class FlagColors {
     public float getWhite() {
         return white;
     }
+
+    public String getFlagImagePath() {
+        return flagImagePath;
+    }
+
 }
