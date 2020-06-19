@@ -3,6 +3,7 @@ package Presentation;
 
 import Application.Controller;
 import Config.Constants;
+import Domain.FlagColors;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -13,6 +14,8 @@ import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Window extends JFrame {
 
@@ -20,10 +23,11 @@ public class Window extends JFrame {
     private ImgUtility imgUtility;
     private JFileChooser fileChooser;
     private JLayeredPane layeredPane;
-    private JButton chooseFileButton, findCountryButton, restartButton;
+    private JButton chooseFileButton, findCountryButton;
     private JSlider iterationsSlider, samplesSlider;
     private JLabel iterationsLabel, sampelsLabel, flagLabel, countryLabel;
-    private JPanel chooseFilePanel;
+    private JScrollPane possibleCountriesScrollPane;
+    private JPanel chooseFilePanel, flagCountryPanel, possibleCountriesPanel;
     private GridBagConstraints buttonsPanelContraints, iterationsPanelContraints, sampelsPanelContraints;
 
     public Window(Controller controller){
@@ -53,14 +57,23 @@ public class Window extends JFrame {
         controlPanel.add(initIterationsPanel(), iterationsPanelContraints);
         controlPanel.add(initSamplesPanel(), sampelsPanelContraints);
 
-        initLayeredPane();
-
+        initFlagCountryPanel();
+        initPossibleCountriesPanel();
         this.add(controlPanel, BorderLayout.NORTH);
         this.add(initChooseFilePanel(), BorderLayout.SOUTH);
         this.setVisible(true);
     }
 
+    private void initPossibleCountriesPanel(){
+        possibleCountriesPanel = new JPanel();
+        possibleCountriesPanel.setLayout(new FlowLayout());
+        possibleCountriesScrollPane = new JScrollPane(possibleCountriesPanel);
+        possibleCountriesScrollPane.setPreferredSize(Constants.DIM_SCROLL_PANEL);
+        possibleCountriesScrollPane.setMinimumSize(Constants.DIM_SCROLL_PANEL);
+    }
+
     private void initLayeredPane(){
+
         layeredPane = new JLayeredPane();
 
         layeredPane.setMinimumSize(Constants.DIM_FILE_PANEL);
@@ -88,6 +101,41 @@ public class Window extends JFrame {
 
     }
 
+    private void initFlagCountryPanel(){
+        flagCountryPanel = new JPanel();
+        flagCountryPanel.setLayout(new BorderLayout());
+
+        findCountryButton = new JButton(Constants.TEXT_FIND_COUNTRY_BUTTON);
+
+        findCountryButton.setMinimumSize(Constants.DIM_BUTTON);
+        findCountryButton.setPreferredSize(Constants.DIM_BUTTON);
+
+        findCountryButton.addActionListener(e -> {
+            if (findCountryButton.getText().equals(Constants.TEXT_TRY_AGAIN_BUTTON)){
+                findCountryButton.setText(Constants.TEXT_FIND_COUNTRY_BUTTON);
+                flagLabel.setIcon(null);
+                countryLabel.setText("");
+                layeredPane.setLayer(flagLabel, 0);
+                layeredPane.setLayer(countryLabel, 1);
+                possibleCountriesPanel.removeAll();
+                this.remove(flagCountryPanel);
+                this.add(chooseFilePanel, BorderLayout.SOUTH);
+            } else {
+                findCountryButton.setText(Constants.TEXT_TRY_AGAIN_BUTTON);
+                showFlagCountry(controller.getCountryForFlag(fileChooser.getSelectedFile().getAbsolutePath(),
+                        iterationsSlider.getValue(),
+                        samplesSlider.getValue()));
+            }
+            this.repaint();
+            this.revalidate();
+        });
+
+        initLayeredPane();
+
+        flagCountryPanel.add(layeredPane, BorderLayout.NORTH);
+        flagCountryPanel.add(findCountryButton, BorderLayout.SOUTH);
+    }
+
 
     public void addFlagToWindow(String flagPath){
         this.remove(chooseFilePanel);
@@ -99,33 +147,8 @@ public class Window extends JFrame {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        this.add(layeredPane, BorderLayout.CENTER);
-        findCountryButton = new JButton(Constants.TEXT_FIND_COUNTRY_BUTTON);
-
-        findCountryButton.addActionListener(e -> {
-            findCountryButton.setText(Constants.TEXT_TRY_AGAIN_BUTTON);
-            showFlagCountry(controller.getCountryForFlag(fileChooser.getSelectedFile().getAbsolutePath(),
-                    iterationsSlider.getValue(),
-                    samplesSlider.getValue()));
-            this.remove(findCountryButton);
-            this.add(restartButton, BorderLayout.SOUTH);
-        });
-
-        restartButton =  new JButton(Constants.TEXT_TRY_AGAIN_BUTTON);
-
-        restartButton.addActionListener(e -> {
-            flagLabel.setIcon(null);
-            countryLabel.setText("");
-            layeredPane.setLayer(flagLabel, 0);
-            layeredPane.setLayer(countryLabel, 1);
-            this.remove(layeredPane);
-            this.remove(restartButton);
-            this.add(chooseFilePanel, BorderLayout.SOUTH);
-            this.repaint();
-        });
-
-        this.add(findCountryButton, BorderLayout.SOUTH);
+        this.add(flagCountryPanel);
+        this.revalidate();
         this.repaint();
     }
 
@@ -133,12 +156,45 @@ public class Window extends JFrame {
         countryLabel.setText(country);
         if (country.length() > 10){
             countryLabel.setFont(Constants.FONT_SMALL_LABEL);
-
         } else {
             countryLabel.setFont(Constants.FONT_LABEL);
         }
         layeredPane.setLayer(countryLabel, 1);
-        this.repaint();
+        //flagCountryPanel.remove(findCountryButton);
+        flagCountryPanel.add(possibleCountriesScrollPane, BorderLayout.CENTER);
+        //flagCountryPanel.add(findCountryButton, BorderLayout.SOUTH);
+    }
+
+    public void showAllPossibleCountries(ArrayList<FlagColors> possibleFlags, HashMap<String, Integer> sortedFlags){
+        String country;
+        if (possibleFlags != null){
+            for (int i = 0; i < possibleFlags.size(); i++){
+                String flagPath = possibleFlags.get(i).getFlagImagePath();
+                country = controller.getCountryForFlag(flagPath);
+                possibleCountriesPanel.add(createFlagCountryLabel(country, flagPath));
+            }
+        } else {
+            Object [] countries = sortedFlags.keySet().toArray();
+            for (int i = 0; i < countries.length; i++){
+                String flagPath = (String) countries[i];
+                country = controller.getCountryForFlag(flagPath);
+                possibleCountriesPanel.add(createFlagCountryLabel(country + " (" + sortedFlags.get(flagPath) + ")", flagPath));
+            }
+        }
+    }
+
+    private JLabel createFlagCountryLabel(String text, String flagPath){
+        JLabel country = new JLabel(text);
+        country.setHorizontalTextPosition(JLabel.CENTER);
+        country.setVerticalTextPosition(JLabel.BOTTOM);
+        try {
+            BufferedImage flag = ImageIO.read(new File(Constants.USER_PATH + "/flags/" + flagPath));
+            BufferedImage resized = imgUtility.resize(flag, (int) (Constants.DIM_SCROLL_PANEL.getWidth() * 0.25), (int) (Constants.DIM_SCROLL_PANEL.getHeight() * 0.25));
+            country.setIcon(new ImageIcon(resized));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return country;
     }
 
     private JPanel initButtonsPanel(){
@@ -203,6 +259,7 @@ public class Window extends JFrame {
         iterationsLabelContraints.fill = GridBagConstraints.HORIZONTAL;
         iterationsLabelContraints.gridx = 0;
         iterationsLabelContraints.gridy = 0;
+        iterationsLabelContraints.insets = new Insets(0, 0, 0, 108);
         iterationsSliderContraints.gridwidth = 1;
 
         iterationsPanel.add(iterationsLabel, iterationsLabelContraints);

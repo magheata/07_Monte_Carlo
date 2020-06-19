@@ -62,13 +62,14 @@ public class Controller implements IController {
 
     @Override
     public String getCountryForFlag(String flagPath, int iterations, int samples) {
-        ArrayList<FlagColors> possibleFlags;
+        ArrayList<FlagColors> possibleFlags = null;
         FlagColors flagColors;
         if (!useProbabilisticAlgorithm){
             try {
                 flagColors = colorimetryService.findColorPercentages(flagPath,
                         ImageIO.read(new File(flagPath)));
                 possibleFlags = getPossibleFlags(flagColors);
+                window.showAllPossibleCountries(possibleFlags, null);
                 return dbManager.getNameOfCountryFlag((String) getFlagWithBestScore(possibleFlags.iterator(), flagColors)[0]);
             } catch (IOException e) {}
         } else {
@@ -88,18 +89,19 @@ public class Controller implements IController {
                     }
                 }
                 HashMap<String, Integer> sortedFlags = sortByValue(flagOccurrences);
-                Object [] blah = sortedFlags.keySet().toArray();
-
-                for (int i = 0; i < sortedFlags.size(); i++){
-                    System.out.println(blah[i] + " : " + sortedFlags.get(blah[i]));
-                }
-
                 System.out.println(sortedFlags);
+                window.showAllPossibleCountries(null, sortedFlags);
                 return dbManager.getNameOfCountryFlag((String) sortedFlags.keySet().toArray()[sortedFlags.keySet().size() - 1]);
             } catch (IOException e) {}
 
         }
         return null;
+    }
+
+
+    @Override
+    public String getCountryForFlag(String flagImage) {
+        return dbManager.getNameOfCountryFlag(flagImage);
     }
 
     // function to sort hashmap by values

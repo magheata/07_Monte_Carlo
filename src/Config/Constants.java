@@ -26,11 +26,13 @@ import java.util.Map;
 public class Constants {
 
     public static final int WIDTH_WINDOW = 600;
-    public static final int HEIGHT_WINDOW = 650;
-    public static final int WIDTH_CONTROL_PANEL = 600;
-    public static final int HEIGHT_CONTROL_PANEL = 200;
-    public static final int WIDTH_FILE_PANEL = 600;
-    public static final int HEIGHT_FILE_PANEL = 400;
+    public static final int HEIGHT_WINDOW = 800;
+    public static final int WIDTH_CONTROL_PANEL = WIDTH_WINDOW;
+    public static final int HEIGHT_CONTROL_PANEL = (int) (HEIGHT_WINDOW * 0.20);
+    public static final int WIDTH_FILE_PANEL = WIDTH_WINDOW;
+    public static final int HEIGHT_FILE_PANEL = (int) (HEIGHT_WINDOW * 0.60);
+    public static final int WIDTH_SCROLL_PANEL = WIDTH_WINDOW;
+    public static final int HEIGHT_SCROLL_PANEL = (int) (HEIGHT_WINDOW * 0.20);
 
     public static final int WIDTH_ITERATIONS_PANEL = 600;
     public static final int HEIGHT_ITERATIONS_PANEL = 50;
@@ -41,12 +43,17 @@ public class Constants {
     public static final int WIDTH_SLIDER = 300;
     public static final int HEIGHT_SLIDER = 50;
 
+    public static final int WIDTH_BUTTON = WIDTH_WINDOW;
+    public static final int HEIGHT_BUTTON = 25;
+
     public static final Dimension DIM_WINDOW = new Dimension(WIDTH_WINDOW, HEIGHT_WINDOW);
     public static final Dimension DIM_CONTROL_PANEL = new Dimension(WIDTH_CONTROL_PANEL, HEIGHT_CONTROL_PANEL);
     public static final Dimension DIM_FILE_PANEL = new Dimension(WIDTH_FILE_PANEL, HEIGHT_FILE_PANEL);
     public static final Dimension DIM_ITERATIONS_PANEL = new Dimension(WIDTH_ITERATIONS_PANEL, HEIGHT_ITERATIONS_PANEL);
     public static final Dimension DIM_SAMPLES_PANEL = new Dimension(WIDTH_SAMPLES_PANEL, HEIGHT_SAMPLES_PANEL);
     public static final Dimension DIM_SLIDER = new Dimension(WIDTH_SLIDER, HEIGHT_SLIDER);
+    public static final Dimension DIM_BUTTON = new Dimension(WIDTH_BUTTON, HEIGHT_BUTTON);
+    public static final Dimension DIM_SCROLL_PANEL = new Dimension(WIDTH_SCROLL_PANEL, HEIGHT_SCROLL_PANEL);
 
     public static final int COLOR_MARGIN = 15;
 
