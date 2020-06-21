@@ -134,7 +134,6 @@ public class DBManager implements IDBManager {
                 String name = rs.getString("country");
                 String code = rs.getString("code");
                 String flag = rs.getString("flag");
-
                 System.out.println(name + " " + code + " " + flag);
             }
         } catch (SQLException throwables) {

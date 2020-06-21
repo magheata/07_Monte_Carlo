@@ -14,8 +14,9 @@ import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 public class Window extends JFrame {
 
@@ -24,16 +25,22 @@ public class Window extends JFrame {
     private JFileChooser fileChooser;
     private JLayeredPane layeredPane;
     private JButton chooseFileButton, findCountryButton;
-    private JSlider iterationsSlider, samplesSlider;
-    private JLabel iterationsLabel, sampelsLabel, flagLabel, countryLabel;
+    private JSlider iterationsSlider, samplesSlider, marginSlider;
+    private JLabel iterationsLabel, sampelsLabel, marginLabel, flagLabel, countryLabel;
     private JScrollPane possibleCountriesScrollPane;
     private JPanel chooseFilePanel, flagCountryPanel, possibleCountriesPanel;
-    private GridBagConstraints buttonsPanelContraints, iterationsPanelContraints, sampelsPanelContraints;
+    private JOptionPane messageOptionPane;
+    private GridBagConstraints buttonsPanelContraints, iterationsPanelContraints, sampelsPanelContraints,
+            marginPanelConstraints, userControlPanelConstraints;
 
     public Window(Controller controller){
         this.controller = controller;
         this.imgUtility = new ImgUtility();
         initComponents();
+    }
+
+    public void showDialog(String text, String title, int type){
+        messageOptionPane.showMessageDialog(this.getContentPane(), text, title, type);
     }
 
     private void initComponents() {
@@ -47,15 +54,23 @@ public class Window extends JFrame {
             }
         });
 
+        messageOptionPane = new JOptionPane();
         JPanel controlPanel = new JPanel();
+
         controlPanel.setLayout(new GridBagLayout());
         controlPanel.setSize(Constants.DIM_CONTROL_PANEL);
         controlPanel.setPreferredSize(Constants.DIM_CONTROL_PANEL);
         controlPanel.setMinimumSize(Constants.DIM_CONTROL_PANEL);
 
+        JPanel userControlPanel = new JPanel();
+        userControlPanel.setLayout(new GridBagLayout());
+
+        userControlPanel.add(initIterationsPanel(), iterationsPanelContraints);
+        userControlPanel.add(initSamplesPanel(), sampelsPanelContraints);
+
         controlPanel.add(initButtonsPanel(), buttonsPanelContraints);
-        controlPanel.add(initIterationsPanel(), iterationsPanelContraints);
-        controlPanel.add(initSamplesPanel(), sampelsPanelContraints);
+        controlPanel.add(initMarginPanel(), marginPanelConstraints);
+        controlPanel.add(userControlPanel, userControlPanelConstraints);
 
         initFlagCountryPanel();
         initPossibleCountriesPanel();
@@ -121,10 +136,22 @@ public class Window extends JFrame {
                 this.remove(flagCountryPanel);
                 this.add(chooseFilePanel, BorderLayout.SOUTH);
             } else {
-                findCountryButton.setText(Constants.TEXT_TRY_AGAIN_BUTTON);
-                showFlagCountry(controller.getCountryForFlag(fileChooser.getSelectedFile().getAbsolutePath(),
+                Future response = controller.getCountryForFlag(fileChooser.getSelectedFile().getAbsolutePath(),
                         iterationsSlider.getValue(),
-                        samplesSlider.getValue()));
+                        samplesSlider.getValue());
+                while (!response.isDone()){}
+                Object[] controllerCountryResponse = new Object[2];
+                try {
+                    controllerCountryResponse = (Object[]) response.get();
+                } catch (InterruptedException interruptedException) {
+                    interruptedException.printStackTrace();
+                } catch (ExecutionException executionException) {
+                    executionException.printStackTrace();
+                }
+                if (controllerCountryResponse != null){
+                    showFlagCountry((String) controllerCountryResponse[0], (boolean) controllerCountryResponse[1]);
+                    findCountryButton.setText(Constants.TEXT_TRY_AGAIN_BUTTON);
+                }
             }
             this.repaint();
             this.revalidate();
@@ -152,26 +179,31 @@ public class Window extends JFrame {
         this.repaint();
     }
 
-    public void showFlagCountry(String country){
+    public void showFlagCountry(String country, boolean useWhiteFont){
         countryLabel.setText(country);
         if (country.length() > 10){
             countryLabel.setFont(Constants.FONT_SMALL_LABEL);
         } else {
             countryLabel.setFont(Constants.FONT_LABEL);
         }
+        if (useWhiteFont){
+            countryLabel.setForeground(Color.white);
+        } else {
+            countryLabel.setForeground(Color.BLACK);
+        }
         layeredPane.setLayer(countryLabel, 1);
-        //flagCountryPanel.remove(findCountryButton);
         flagCountryPanel.add(possibleCountriesScrollPane, BorderLayout.CENTER);
-        //flagCountryPanel.add(findCountryButton, BorderLayout.SOUTH);
     }
 
-    public void showAllPossibleCountries(ArrayList<FlagColors> possibleFlags, HashMap<String, Integer> sortedFlags){
+    public void showAllPossibleCountries(ArrayList<FlagColors> possibleFlags, HashMap<String, Float> percentageOfEqualColors, HashMap<String, Integer> sortedFlags){
         String country;
         if (possibleFlags != null){
-            for (int i = 0; i < possibleFlags.size(); i++){
-                String flagPath = possibleFlags.get(i).getFlagImagePath();
+            Map<String, Float> flags = sortByComparator(percentageOfEqualColors, false);
+            Iterator it = flags.keySet().iterator();
+            while (it.hasNext()){
+                String flagPath = (String) it.next();
                 country = controller.getCountryForFlag(flagPath);
-                possibleCountriesPanel.add(createFlagCountryLabel(country, flagPath));
+                possibleCountriesPanel.add(createFlagCountryLabel(country + "\n" + String.format("%.2f", percentageOfEqualColors.get(flagPath)) + "%", flagPath));
             }
         } else {
             Object [] countries = sortedFlags.keySet().toArray();
@@ -181,6 +213,30 @@ public class Window extends JFrame {
                 possibleCountriesPanel.add(createFlagCountryLabel(country + " (" + sortedFlags.get(flagPath) + ")", flagPath));
             }
         }
+    }
+
+    private static Map<String, Float> sortByComparator(Map<String, Float> unsortMap, final boolean order) {
+
+        ArrayList<Map.Entry<String, Float>> list = new ArrayList<>(unsortMap.entrySet());
+
+        // Sorting the list based on values
+        Collections.sort(list, (o1, o2) -> {
+            if (order) {
+                return o1.getValue().compareTo(o2.getValue());
+            } else {
+                return o2.getValue().compareTo(o1.getValue());
+
+            }
+        });
+
+        // Maintaining insertion order with the help of LinkedList
+        Map<String, Float> sortedMap = new LinkedHashMap<>();
+        for (Map.Entry<String, Float> entry : list)
+        {
+            sortedMap.put(entry.getKey(), entry.getValue());
+        }
+
+        return sortedMap;
     }
 
     private JLabel createFlagCountryLabel(String text, String flagPath){
@@ -230,6 +286,55 @@ public class Window extends JFrame {
         return buttonsPanel;
     }
 
+    private JPanel initMarginPanel(){
+        JPanel marginPanel = new JPanel(new GridBagLayout());
+
+        marginPanel.setPreferredSize(Constants.DIM_ITERATIONS_PANEL);
+        marginPanel.setSize(Constants.DIM_ITERATIONS_PANEL);
+        marginPanel.setMinimumSize(Constants.DIM_ITERATIONS_PANEL);
+
+        marginSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 10, 0);
+        marginSlider.setPreferredSize(Constants.DIM_SLIDER);
+        marginSlider.setMinimumSize(Constants.DIM_SLIDER);
+
+        marginSlider.setMajorTickSpacing(2);
+        marginSlider.setMinorTickSpacing(1);
+        marginSlider.setPaintTicks(true);
+        marginSlider.setPaintLabels(true);
+
+        GridBagConstraints iterationsSliderContraints = new GridBagConstraints();
+        iterationsSliderContraints.fill = GridBagConstraints.HORIZONTAL;
+        iterationsSliderContraints.gridx = 2;
+        iterationsSliderContraints.gridy = 0;
+        iterationsSliderContraints.gridwidth = 2;
+
+        marginLabel = new JLabel("Error margin for flag colors: ");
+
+        GridBagConstraints marginLabelContraints = new GridBagConstraints();
+        marginLabelContraints.fill = GridBagConstraints.HORIZONTAL;
+        marginLabelContraints.gridx = 0;
+        marginLabelContraints.gridy = 0;
+        marginLabelContraints.insets = new Insets(0, 0, 0, 68);
+        iterationsSliderContraints.gridwidth = 1;
+
+        marginPanel.add(marginLabel, marginLabelContraints);
+        marginPanel.add(marginSlider, iterationsSliderContraints);
+
+        marginPanelConstraints = new GridBagConstraints();
+        marginPanelConstraints.fill = GridBagConstraints.HORIZONTAL;
+        marginPanelConstraints.gridx = 0;
+        marginPanelConstraints.gridy = 2;
+        marginPanelConstraints.gridwidth = 3;
+
+        userControlPanelConstraints = new GridBagConstraints();
+        userControlPanelConstraints.fill = GridBagConstraints.HORIZONTAL;
+        userControlPanelConstraints.gridx = 0;
+        userControlPanelConstraints.gridy = 1;
+        userControlPanelConstraints.gridwidth = 3;
+
+        return marginPanel;
+    }
+
     private JPanel initIterationsPanel(){
         JPanel iterationsPanel = new JPanel(new GridBagLayout());
 
@@ -268,7 +373,7 @@ public class Window extends JFrame {
         iterationsPanelContraints = new GridBagConstraints();
         iterationsPanelContraints.fill = GridBagConstraints.HORIZONTAL;
         iterationsPanelContraints.gridx = 0;
-        iterationsPanelContraints.gridy = 1;
+        iterationsPanelContraints.gridy = 0;
         iterationsPanelContraints.gridwidth = 3;
 
         return iterationsPanel;
@@ -297,7 +402,7 @@ public class Window extends JFrame {
         sampelsPanelContraints = new GridBagConstraints();
         sampelsPanelContraints.fill = GridBagConstraints.HORIZONTAL;
         sampelsPanelContraints.gridx = 0;
-        sampelsPanelContraints.gridy = 2;
+        sampelsPanelContraints.gridy = 1;
         sampelsPanelContraints.gridwidth = 3;
         return samplesPanel;
     }
@@ -352,5 +457,9 @@ public class Window extends JFrame {
         button.setBorderPainted(true);
         button.setContentAreaFilled(true);
         button.setOpaque(true);
+    }
+
+    public float getMargin() {
+        return marginSlider.getValue();
     }
 }

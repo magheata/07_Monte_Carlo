@@ -9,15 +9,20 @@ import Infrastructure.DB.DBManager;
 import Presentation.Window;
 
 import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class Controller implements IController {
 
     private ColorimetryService colorimetryService;
     private DBManager dbManager;
     private Window window;
+    private ExecutorService executor;
     private boolean useProbabilisticAlgorithm = false;
 
     public Controller() {
@@ -28,6 +33,7 @@ public class Controller implements IController {
         }
         loadFlagsTable();
         window = new Window(this);
+        executor = Executors.newSingleThreadExecutor();
     }
 
     @Override
@@ -61,43 +67,89 @@ public class Controller implements IController {
     }
 
     @Override
-    public String getCountryForFlag(String flagPath, int iterations, int samples) {
-        ArrayList<FlagColors> possibleFlags = null;
-        FlagColors flagColors;
-        if (!useProbabilisticAlgorithm){
-            try {
-                flagColors = colorimetryService.findColorPercentages(flagPath,
-                        ImageIO.read(new File(flagPath)));
-                possibleFlags = getPossibleFlags(flagColors);
-                window.showAllPossibleCountries(possibleFlags, null);
-                return dbManager.getNameOfCountryFlag((String) getFlagWithBestScore(possibleFlags.iterator(), flagColors)[0]);
-            } catch (IOException e) {}
-        } else {
-            try {
-                HashMap<String, Integer> flagOccurrences = new HashMap<>();
-                for (int i = 0; i < iterations; i++){
-                    flagColors = colorimetryService.findColorPercentagesMonteCarlo(flagPath,
-                            ImageIO.read(new File(flagPath)),
-                            samples);
-                    possibleFlags = getPossibleFlags(flagColors);
-                    Object[] bestFlag = getFlagWithBestScore(possibleFlags.iterator(), flagColors);
-                    if (flagOccurrences.containsKey(bestFlag[0])){
-                        int occurrences = flagOccurrences.get(bestFlag[0]);
-                        flagOccurrences.replace((String) bestFlag[0], occurrences + 1);
-                    } else {
-                        flagOccurrences.put((String) bestFlag[0], 1);
-                    }
+    public Future<Object[]> getCountryForFlag(String flagPath, int iterations, int samples) {
+        return executor.submit(() -> {
+            if (useProbabilisticAlgorithm){
+                if (iterations == 0){
+                    window.showDialog("Iterations not specified", "Error", JOptionPane.ERROR_MESSAGE);
+                    return null;
                 }
-                HashMap<String, Integer> sortedFlags = sortByValue(flagOccurrences);
-                System.out.println(sortedFlags);
-                window.showAllPossibleCountries(null, sortedFlags);
-                return dbManager.getNameOfCountryFlag((String) sortedFlags.keySet().toArray()[sortedFlags.keySet().size() - 1]);
-            } catch (IOException e) {}
+                if (samples == 0){
+                    window.showDialog("Number of samples not specified", "Error", JOptionPane.ERROR_MESSAGE);
+                    return null;
+                }
+            }
 
-        }
-        return null;
+            ArrayList<FlagColors> possibleFlags;
+            FlagColors flagColors;
+            boolean useWhiteFont = false;
+            if (!useProbabilisticAlgorithm){
+                try {
+                    flagColors = colorimetryService.findColorPercentages(flagPath,
+                            ImageIO.read(new File(flagPath)));
+                    possibleFlags = getPossibleFlags(flagColors);
+                    window.showAllPossibleCountries(possibleFlags, getPercentageOfEqualColors(flagColors, possibleFlags), null);
+                    if (flagColors.getBlack() > 35){
+                        useWhiteFont = true;
+                    }
+                    return new Object[] {dbManager.getNameOfCountryFlag((String) getFlagWithBestScore(possibleFlags.iterator(), flagColors)[0]),
+                            useWhiteFont};
+                } catch (IOException e) {}
+            } else {
+                try {
+                    HashMap<String, Integer> flagOccurrences = new HashMap<>();
+                    for (int i = 0; i < iterations; i++){
+                        flagColors = colorimetryService.findColorPercentagesMonteCarlo(flagPath,
+                                ImageIO.read(new File(flagPath)),
+                                samples);
+                        if (flagColors.getBlack() > 35){
+                            useWhiteFont = true;
+                        }
+                        possibleFlags = getPossibleFlags(flagColors);
+                        Object[] bestFlag = getFlagWithBestScore(possibleFlags.iterator(), flagColors);
+                        if (flagOccurrences.containsKey(bestFlag[0])){
+                            int occurrences = flagOccurrences.get(bestFlag[0]);
+                            flagOccurrences.replace((String) bestFlag[0], occurrences + 1);
+                        } else {
+                            flagOccurrences.put((String) bestFlag[0], 1);
+                        }
+                    }
+                    HashMap<String, Integer> sortedFlags = sortByValue(flagOccurrences);
+                    window.showAllPossibleCountries(null, null, sortedFlags);
+                    return new Object[] {dbManager.getNameOfCountryFlag((String) sortedFlags.keySet().toArray()[sortedFlags.keySet().size() - 1]),
+                            useWhiteFont};
+                } catch (IOException e) {}
+            }
+            return null;
+        });
     }
 
+    private HashMap<String, Float> getPercentageOfEqualColors(FlagColors flagColors, ArrayList<FlagColors> possibleFlags){
+        HashMap<String, Float> percentages = new HashMap<>();
+        for (FlagColors possibleFlag: possibleFlags) {
+            percentages.put(possibleFlag.getFlagImagePath(), 100 - getDifferenceBetweenFlagColors(flagColors, possibleFlag));
+        }
+        return percentages;
+    }
+
+    private float getDifferenceBetweenFlagColors(FlagColors flagColors, FlagColors possibleFlag){
+        float percentageColors = 0;
+        percentageColors = percentageColors + Math.abs(flagColors.getRed() - possibleFlag.getRed());
+        percentageColors = percentageColors + Math.abs(flagColors.getOrange() - possibleFlag.getOrange());
+        percentageColors = percentageColors + Math.abs(flagColors.getYellow() - possibleFlag.getYellow());
+        percentageColors = percentageColors + Math.abs(flagColors.getGreen_1() - possibleFlag.getGreen_1());
+        percentageColors = percentageColors + Math.abs(flagColors.getGreen_2() - possibleFlag.getGreen_2());
+        percentageColors = percentageColors + Math.abs(flagColors.getGreen_3() - possibleFlag.getGreen_3());
+        percentageColors = percentageColors + Math.abs(flagColors.getBlue_1() - possibleFlag.getBlue_1());
+        percentageColors = percentageColors + Math.abs(flagColors.getBlue_2() - possibleFlag.getBlue_2());
+        percentageColors = percentageColors + Math.abs(flagColors.getBlue_3() - possibleFlag.getBlue_3());
+        percentageColors = percentageColors + Math.abs(flagColors.getIndigo() - possibleFlag.getIndigo());
+        percentageColors = percentageColors + Math.abs(flagColors.getPink() - possibleFlag.getPink());
+        percentageColors = percentageColors + Math.abs(flagColors.getMagenta() - possibleFlag.getMagenta());
+        percentageColors = percentageColors + Math.abs(flagColors.getWhite() - possibleFlag.getWhite());
+        percentageColors = percentageColors + Math.abs(flagColors.getBlack() - possibleFlag.getBlack());
+        return percentageColors;
+    }
 
     @Override
     public String getCountryForFlag(String flagImage) {
@@ -122,57 +174,17 @@ public class Controller implements IController {
     }
 
     private Object[] getFlagWithBestScore(Iterator iterator, FlagColors flagColors){
-        int bestScore = 0;
+        float bestScore = Float.MAX_VALUE;
         String filePathCorrectFlag = "";
         while (iterator.hasNext()){
             FlagColors possibleFlag = (FlagColors) iterator.next();
-            int flagScore = getTotalScoreForThisFlag(flagColors, possibleFlag);
-            if (flagScore > bestScore){
+            float flagScore = getDifferenceBetweenFlagColors(flagColors, possibleFlag);
+            if (flagScore < bestScore){
                 bestScore = flagScore;
                 filePathCorrectFlag = possibleFlag.getFlagImagePath();
             }
         }
         return new Object[]{filePathCorrectFlag, bestScore};
-    }
-
-    private int getTotalScoreForThisFlag(FlagColors actualFlag, FlagColors possiblePath) {
-        int score = 0;
-        if (withinRange(actualFlag.getRed(), possiblePath.getRed())){
-            score++;
-        }
-        if (withinRange(actualFlag.getOrange(), possiblePath.getOrange())){
-            score++;
-        }if (withinRange(actualFlag.getYellow(), possiblePath.getYellow())){
-            score++;
-        }if (withinRange(actualFlag.getGreen_1(), possiblePath.getGreen_1())){
-            score++;
-        }if (withinRange(actualFlag.getGreen_2(), possiblePath.getGreen_2())){
-            score++;
-        }if (withinRange(actualFlag.getGreen_3(), possiblePath.getGreen_3())){
-            score++;
-        }if (withinRange(actualFlag.getBlue_1(), possiblePath.getBlue_1())){
-            score++;
-        }if (withinRange(actualFlag.getBlue_2(), possiblePath.getBlue_2())){
-            score++;
-        }if (withinRange(actualFlag.getBlue_3(), possiblePath.getBlue_3())){
-            score++;
-        }if (withinRange(actualFlag.getIndigo(), possiblePath.getIndigo())){
-            score++;
-        }if (withinRange(actualFlag.getPink(), possiblePath.getPink())){
-            score++;
-        }if (withinRange(actualFlag.getMagenta(), possiblePath.getMagenta())){
-            score++;
-        }if (withinRange(actualFlag.getBlack(), possiblePath.getBlack())){
-            score++;
-        }if (withinRange(actualFlag.getWhite(), possiblePath.getWhite())){
-            score++;
-        }
-        return score;
-    }
-
-    private boolean withinRange(float goalValue, float valueToCheck){
-        return (valueToCheck >= (goalValue - 3.5)) &&
-                ((goalValue + 3.5) >= valueToCheck);
     }
 
     @Override
@@ -182,7 +194,7 @@ public class Controller implements IController {
 
     public ArrayList<FlagColors> getPossibleFlags(FlagColors selectedFlag){
         ArrayList<FlagColors> flags = new ArrayList<>();
-        float margin = 5.5f;
+        float margin = window.getMargin();
         while (flags.isEmpty()){
             flags = dbManager.getFlagsWithinRange(margin,
                     selectedFlag.getRed(),

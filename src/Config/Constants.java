@@ -28,11 +28,11 @@ public class Constants {
     public static final int WIDTH_WINDOW = 600;
     public static final int HEIGHT_WINDOW = 800;
     public static final int WIDTH_CONTROL_PANEL = WIDTH_WINDOW;
-    public static final int HEIGHT_CONTROL_PANEL = (int) (HEIGHT_WINDOW * 0.20);
+    public static final int HEIGHT_CONTROL_PANEL = (int) (HEIGHT_WINDOW * 0.25);
     public static final int WIDTH_FILE_PANEL = WIDTH_WINDOW;
     public static final int HEIGHT_FILE_PANEL = (int) (HEIGHT_WINDOW * 0.60);
     public static final int WIDTH_SCROLL_PANEL = WIDTH_WINDOW;
-    public static final int HEIGHT_SCROLL_PANEL = (int) (HEIGHT_WINDOW * 0.20);
+    public static final int HEIGHT_SCROLL_PANEL = (int) (HEIGHT_WINDOW * 0.15);
 
     public static final int WIDTH_ITERATIONS_PANEL = 600;
     public static final int HEIGHT_ITERATIONS_PANEL = 50;
