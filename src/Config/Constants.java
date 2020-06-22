@@ -70,6 +70,8 @@ public class Constants {
     public static final int HSB_PINK = 300;
     public static final int HSB_MAGENTA = 330;
 
+    public static final int BLACK_LIMIT = 35;
+
     public static final Map<Integer, Color> HSB_COLORS = Map.ofEntries(
             new AbstractMap.SimpleEntry<>(HSB_RED, Color.RED),
             new AbstractMap.SimpleEntry<>(HSB_ORANGE, Color.ORANGE),

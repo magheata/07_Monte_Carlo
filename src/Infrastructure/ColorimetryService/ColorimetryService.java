@@ -11,16 +11,25 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
+/**
+ * Class in charge of calculating the color information of the flag. The methods used to do this are:
+ *      1. Traditional method: calculates the colors by analyzing all the pixels of the flag
+ *      2. Probabilistic method: calculates the colors by analyzing random pixels of the flag
+ */
 public class ColorimetryService implements IColorimetryService {
 
     private HSBConverter hsbConverter;
 
-    private int totalPixels;
     public ColorimetryService(){
         hsbConverter = new HSBConverter();
     }
 
-    // "Tradicional"
+    /**
+     *  Traditional method
+     * @param flagImagePath
+     * @param image
+     * @return
+     */
     @Override
     public FlagColors findColorPercentages(String flagImagePath, BufferedImage image){
         float redCount = 0,
@@ -38,7 +47,7 @@ public class ColorimetryService implements IColorimetryService {
                 whiteCount = 0,
                 blackCount = 0;
 
-        totalPixels = image.getWidth() * image.getHeight();
+        int totalPixels = image.getWidth() * image.getHeight();
 
         for (int x = 0; x < image.getWidth(); x++){
             for (int y = 0; y < image.getHeight(); y++){
@@ -112,10 +121,13 @@ public class ColorimetryService implements IColorimetryService {
                 getColorPercentage(whiteCount, totalPixels));
     }
 
-    private float getColorPercentage(float colorPixels, int totalPixels){
-        return (colorPixels / totalPixels) * 100;
-    }
-
+    /**
+     * Probabilistic method
+     * @param flagImagePath
+     * @param image
+     * @param samples total of random pixels to analyze
+     * @return
+     */
     @Override
     public FlagColors findColorPercentagesMonteCarlo(String flagImagePath, BufferedImage image, int samples) {
         ArrayList<Object[]> selectedPositions = new ArrayList<>();
@@ -133,8 +145,6 @@ public class ColorimetryService implements IColorimetryService {
                 magentaCount = 0,
                 whiteCount = 0,
                 blackCount = 0;
-
-        totalPixels = image.getWidth() * image.getHeight();
 
         for (int i = 0; i < samples; i++){
             int random_x = ThreadLocalRandom.current().nextInt(0, image.getWidth());
@@ -214,6 +224,13 @@ public class ColorimetryService implements IColorimetryService {
                 getColorPercentage(whiteCount, samples));
     }
 
+    /**
+     * Casts RGB color to HSB color
+     * @param r
+     * @param g
+     * @param b
+     * @return
+     */
     @Override
     public Color getPixelColor(int r, int g, int b){
         HSBColor hsbColor = hsbConverter.rgbToHsb(r, g, b);
@@ -232,6 +249,22 @@ public class ColorimetryService implements IColorimetryService {
         return null;
     }
 
+    /**
+     *
+     * @param colorPixels
+     * @param totalPixels
+     * @return
+     */
+    private float getColorPercentage(float colorPixels, int totalPixels){
+        return (colorPixels / totalPixels) * 100;
+    }
+
+    /**
+     *
+     * @param color
+     * @param hue
+     * @return
+     */
     private boolean isColor(int color, float hue){
         int hueAux = 0;
         boolean useAux = false;
@@ -247,6 +280,13 @@ public class ColorimetryService implements IColorimetryService {
                 ((color <= hue) && (hue <= color + Constants.COLOR_MARGIN)));
     }
 
+    /**
+     *
+     * @param pixels
+     * @param x
+     * @param y
+     * @return
+     */
     private boolean selectedPixelUsed(ArrayList<Object[]> pixels, int x, int y){
         for (Object[] pixelPos : pixels){
             if ((x == (Integer) pixelPos[0]) && (y == (Integer) pixelPos[1])){

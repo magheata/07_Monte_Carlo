@@ -1,6 +1,9 @@
 /* Created by andreea on 12/06/2020 */
 package Domain;
 
+/**
+ * Class used to represent the information about the colors of a flag
+ */
 public class FlagColors {
     private String flagImagePath;
     private float red;

@@ -3,6 +3,9 @@ package Infrastructure.ColorimetryService;
 
 import Domain.HSBColor;
 
+/**
+ *  Class used to convert a RGB color into a HSB color
+ */
 public class HSBConverter {
 
     public HSBColor rgbToHsb(int r, int g, int b){

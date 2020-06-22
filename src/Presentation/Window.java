@@ -4,11 +4,13 @@ package Presentation;
 import Application.Controller;
 import Config.Constants;
 import Domain.FlagColors;
+import Utils.Utils;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
@@ -21,7 +23,6 @@ import java.util.concurrent.Future;
 public class Window extends JFrame {
 
     private Controller controller;
-    private ImgUtility imgUtility;
     private JFileChooser fileChooser;
     private JLayeredPane layeredPane;
     private JButton chooseFileButton, findCountryButton;
@@ -35,12 +36,7 @@ public class Window extends JFrame {
 
     public Window(Controller controller){
         this.controller = controller;
-        this.imgUtility = new ImgUtility();
         initComponents();
-    }
-
-    public void showDialog(String text, String title, int type){
-        messageOptionPane.showMessageDialog(this.getContentPane(), text, title, type);
     }
 
     private void initComponents() {
@@ -125,7 +121,18 @@ public class Window extends JFrame {
         findCountryButton.setMinimumSize(Constants.DIM_BUTTON);
         findCountryButton.setPreferredSize(Constants.DIM_BUTTON);
 
-        findCountryButton.addActionListener(e -> {
+        findCountryButton.addActionListener(addActionListenerFindFlagButton());
+
+        initLayeredPane();
+
+        flagCountryPanel.add(layeredPane, BorderLayout.NORTH);
+        flagCountryPanel.add(findCountryButton, BorderLayout.SOUTH);
+    }
+
+
+    public ActionListener addActionListenerFindFlagButton(){
+        JFrame frame = this;
+        return e -> {
             if (findCountryButton.getText().equals(Constants.TEXT_TRY_AGAIN_BUTTON)){
                 findCountryButton.setText(Constants.TEXT_FIND_COUNTRY_BUTTON);
                 flagLabel.setIcon(null);
@@ -133,14 +140,14 @@ public class Window extends JFrame {
                 layeredPane.setLayer(flagLabel, 0);
                 layeredPane.setLayer(countryLabel, 1);
                 possibleCountriesPanel.removeAll();
-                this.remove(flagCountryPanel);
-                this.add(chooseFilePanel, BorderLayout.SOUTH);
+                frame.remove(flagCountryPanel);
+                frame.add(chooseFilePanel, BorderLayout.SOUTH);
             } else {
                 Future response = controller.getCountryForFlag(fileChooser.getSelectedFile().getAbsolutePath(),
                         iterationsSlider.getValue(),
                         samplesSlider.getValue());
                 while (!response.isDone()){}
-                Object[] controllerCountryResponse = new Object[2];
+                Object[] controllerCountryResponse = null;
                 try {
                     controllerCountryResponse = (Object[]) response.get();
                 } catch (InterruptedException interruptedException) {
@@ -153,22 +160,15 @@ public class Window extends JFrame {
                     findCountryButton.setText(Constants.TEXT_TRY_AGAIN_BUTTON);
                 }
             }
-            this.repaint();
-            this.revalidate();
-        });
-
-        initLayeredPane();
-
-        flagCountryPanel.add(layeredPane, BorderLayout.NORTH);
-        flagCountryPanel.add(findCountryButton, BorderLayout.SOUTH);
+            frame.repaint();
+            frame.revalidate();
+        };
     }
-
-
     public void addFlagToWindow(String flagPath){
         this.remove(chooseFilePanel);
         try {
             BufferedImage flag = ImageIO.read(new File(flagPath));
-            BufferedImage resizedImage = imgUtility.resize(flag, flagLabel.getWidth(), flagLabel.getHeight());
+            BufferedImage resizedImage = Utils.resize(flag, flagLabel.getWidth(), flagLabel.getHeight());
             flagLabel.setIcon(new ImageIcon(resizedImage));
             layeredPane.setLayer(flagLabel, 0);
         } catch (IOException e) {
@@ -198,7 +198,7 @@ public class Window extends JFrame {
     public void showAllPossibleCountries(ArrayList<FlagColors> possibleFlags, HashMap<String, Float> percentageOfEqualColors, HashMap<String, Integer> sortedFlags){
         String country;
         if (possibleFlags != null){
-            Map<String, Float> flags = sortByComparator(percentageOfEqualColors, false);
+            Map<String, Float> flags = Utils.sortByComparator(percentageOfEqualColors, false);
             Iterator it = flags.keySet().iterator();
             while (it.hasNext()){
                 String flagPath = (String) it.next();
@@ -215,37 +215,13 @@ public class Window extends JFrame {
         }
     }
 
-    private static Map<String, Float> sortByComparator(Map<String, Float> unsortMap, final boolean order) {
-
-        ArrayList<Map.Entry<String, Float>> list = new ArrayList<>(unsortMap.entrySet());
-
-        // Sorting the list based on values
-        Collections.sort(list, (o1, o2) -> {
-            if (order) {
-                return o1.getValue().compareTo(o2.getValue());
-            } else {
-                return o2.getValue().compareTo(o1.getValue());
-
-            }
-        });
-
-        // Maintaining insertion order with the help of LinkedList
-        Map<String, Float> sortedMap = new LinkedHashMap<>();
-        for (Map.Entry<String, Float> entry : list)
-        {
-            sortedMap.put(entry.getKey(), entry.getValue());
-        }
-
-        return sortedMap;
-    }
-
     private JLabel createFlagCountryLabel(String text, String flagPath){
         JLabel country = new JLabel(text);
         country.setHorizontalTextPosition(JLabel.CENTER);
         country.setVerticalTextPosition(JLabel.BOTTOM);
         try {
             BufferedImage flag = ImageIO.read(new File(Constants.USER_PATH + "/flags/" + flagPath));
-            BufferedImage resized = imgUtility.resize(flag, (int) (Constants.DIM_SCROLL_PANEL.getWidth() * 0.25), (int) (Constants.DIM_SCROLL_PANEL.getHeight() * 0.25));
+            BufferedImage resized = Utils.resize(flag, (int) (Constants.DIM_SCROLL_PANEL.getWidth() * 0.25), (int) (Constants.DIM_SCROLL_PANEL.getHeight() * 0.25));
             country.setIcon(new ImageIcon(resized));
         } catch (IOException e) {
             e.printStackTrace();
@@ -406,6 +382,7 @@ public class Window extends JFrame {
         sampelsPanelContraints.gridwidth = 3;
         return samplesPanel;
     }
+
     private JPanel initChooseFilePanel(){
         fileChooser = new JFileChooser(new File(System.getProperty("user.dir")));
         fileChooser.setFileFilter(new FileNameExtensionFilter("PNG", "png"));
@@ -420,17 +397,14 @@ public class Window extends JFrame {
                     break;
             }
         });
-
-
-        chooseFilePanel = new JPanel();
-
-        chooseFilePanel.setSize(Constants.DIM_FILE_PANEL);
-        chooseFilePanel.setPreferredSize(Constants.DIM_FILE_PANEL);
-        chooseFilePanel.setMinimumSize(Constants.DIM_FILE_PANEL);
-
         chooseFileButton.setSize(Constants.DIM_FILE_PANEL);
         chooseFileButton.setPreferredSize(Constants.DIM_FILE_PANEL);
         chooseFileButton.setMinimumSize(Constants.DIM_FILE_PANEL);
+
+        chooseFilePanel = new JPanel();
+        chooseFilePanel.setSize(Constants.DIM_FILE_PANEL);
+        chooseFilePanel.setPreferredSize(Constants.DIM_FILE_PANEL);
+        chooseFilePanel.setMinimumSize(Constants.DIM_FILE_PANEL);
 
         chooseFilePanel.add(chooseFileButton);
 
@@ -461,5 +435,9 @@ public class Window extends JFrame {
 
     public float getMargin() {
         return marginSlider.getValue();
+    }
+
+    public void showDialog(String text, String title, int type){
+        messageOptionPane.showMessageDialog(this.getContentPane(), text, title, type);
     }
 }

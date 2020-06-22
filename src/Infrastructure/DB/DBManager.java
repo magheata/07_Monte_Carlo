@@ -10,6 +10,9 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+/**
+ * Class in charge of managing the database, its connections and the different queries needed in the application
+ */
 public class DBManager implements IDBManager {
 
     private Connection con;
@@ -27,6 +30,11 @@ public class DBManager implements IDBManager {
         }
     }
 
+    /**
+     * Checks if a given table exists in the database
+     * @param tableName name of the table
+     * @return
+     */
     @Override
     public boolean tableExists(String tableName) {
         Statement stmt;
@@ -41,6 +49,9 @@ public class DBManager implements IDBManager {
         return true;
     }
 
+    /**
+     * Creates the Flags table, which will contain the information of the colors of a flag
+     */
     @Override
     public void createFlagsTable() {
         try {
@@ -65,6 +76,24 @@ public class DBManager implements IDBManager {
         }
     }
 
+    /**
+     *
+     * @param flag
+     * @param red
+     * @param orange
+     * @param yellow
+     * @param green_1
+     * @param green_2
+     * @param green_3
+     * @param blue_1
+     * @param blue_2
+     * @param blue_3
+     * @param indigo
+     * @param pink
+     * @param magenta
+     * @param black
+     * @param white
+     */
     @Override
     public void insertValuesIntoFlagTable(String flag, float red, float orange, float yellow, float green_1, float green_2, float green_3, float blue_1,
                                           float blue_2, float blue_3, float indigo, float pink, float magenta, float black, float white) {
@@ -93,9 +122,13 @@ public class DBManager implements IDBManager {
 
     }
 
+    /**
+     * Fills the Country table with the values of all the flags existing in the application
+     */
     @Override
     public void insertValuesIntoCountryTable() {
         try {
+            // Selects all the flag files available
             readCountryFiles();
             Iterator countryIterator = countries.iterator();
             Iterator codesIterator = codes.iterator();
@@ -105,12 +138,15 @@ public class DBManager implements IDBManager {
             while (countryIterator.hasNext() && codesIterator.hasNext()) {
                 stmt.executeUpdate(insertIntoCountryTableQuery((String) countryIterator.next(), (String) codesIterator.next()));
             }
-            selectAllFromCountryTable();
+            // selectAllFromCountryTable();
             stmt.close();
         } catch (SQLException e) {
         }
     }
 
+    /**
+     * Reads the country files
+     */
     private void readCountryFiles() {
         if (codes.isEmpty()) {
             codes = reader.readFile(Constants.USER_PATH + "/" + Constants.FILE_COUNTRY_CODES);
@@ -121,10 +157,19 @@ public class DBManager implements IDBManager {
         }
     }
 
+    /**
+     *
+     * @param country
+     * @param code
+     * @return
+     */
     private String insertIntoCountryTableQuery(String country, String code) {
         return "INSERT INTO " + Constants.TABLE_COUNTRY + " ( country, code, flag) VALUES ( '" + country + "', '" + code + "' , '" + code.toLowerCase() + ".png')";
     }
 
+    /**
+     *
+     */
     private void selectAllFromCountryTable() {
         Statement stmt;
         try {
@@ -141,6 +186,9 @@ public class DBManager implements IDBManager {
         }
     }
 
+    /**
+     *
+     */
     public void selectAllFromFlagsTable() {
         Statement stmt;
         try {
@@ -168,6 +216,12 @@ public class DBManager implements IDBManager {
         }
     }
 
+    /**
+     *
+     * @param table
+     * @param column
+     * @return
+     */
     @Override
     public ArrayList<String> getAllValuesForColumn(String table, String column) {
         Statement stmt;
@@ -184,6 +238,9 @@ public class DBManager implements IDBManager {
         return values;
     }
 
+    /**
+     *
+     */
     public void closeConnection() {
         try {
             con.close();
@@ -192,6 +249,25 @@ public class DBManager implements IDBManager {
         }
     }
 
+    /**
+     *
+     * @param margin
+     * @param red
+     * @param orange
+     * @param yellow
+     * @param green_1
+     * @param green_2
+     * @param green_3
+     * @param blue_1
+     * @param blue_2
+     * @param blue_3
+     * @param indigo
+     * @param pink
+     * @param magenta
+     * @param black
+     * @param white
+     * @return
+     */
     @Override
     public ArrayList<FlagColors> getFlagsWithinRange(float margin, float red, float orange, float yellow, float green_1, float green_2, float green_3, float blue_1, float blue_2,
                                                      float blue_3, float indigo, float pink, float magenta, float black, float white) {
@@ -238,6 +314,11 @@ public class DBManager implements IDBManager {
         return flags;
     }
 
+    /**
+     *
+     * @param flag
+     * @return
+     */
     @Override
     public String getNameOfCountryFlag(String flag){
         Statement stmt;

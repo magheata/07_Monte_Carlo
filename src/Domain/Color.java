@@ -1,6 +1,9 @@
 /* Created by andreea on 12/06/2020 */
 package Domain;
 
+/**
+ * Enumerate that represents the different colors taken into account when analyzing an image.
+ */
 public enum Color {
     WHITE,
     BLACK,
