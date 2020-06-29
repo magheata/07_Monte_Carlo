@@ -153,27 +153,25 @@ public class Controller implements IController {
      */
     @Override
     public void loadFlagsTable() {
-        executor.submit(() -> {
-            // Only creates it if the table does not exist
-            if (!dbManager.tableExists(Constants.TABLE_FLAGS)){
-                // Create the table that will contain the information of the colors of each flag
-                dbManager.createFlagsTable();
-                // Get all flags existing in the Country table
-                ArrayList<String> countryFlags = dbManager.getAllValuesForColumn("country", "flag");
-                Iterator it = countryFlags.iterator();
-                // For each flag calculate the % of colors and add the result to the Flags table
-                while (it.hasNext()){
-                    String flagImage = (String) it.next();
-                    FlagColors flagColors = findColorPercentageOfImage(Constants.USER_PATH + "/flags/" + flagImage);
-                    if (flagColors != null){
-                        dbManager.insertValuesIntoFlagTable(flagImage, flagColors.getRed(), flagColors.getOrange(),
-                                flagColors.getYellow(), flagColors.getGreen_1(), flagColors.getGreen_2(), flagColors.getGreen_3(),
-                                flagColors.getBlue_1(), flagColors.getBlue_2(), flagColors.getBlue_3(), flagColors.getIndigo(),
-                                flagColors.getPink(), flagColors.getMagenta(), flagColors.getBlack(), flagColors.getWhite());
-                    }
+        // Only creates it if the table does not exist
+        if (!dbManager.tableExists(Constants.TABLE_FLAGS)){
+            // Create the table that will contain the information of the colors of each flag
+            dbManager.createFlagsTable();
+            // Get all flags existing in the Country table
+            ArrayList<String> countryFlags = dbManager.getAllValuesForColumn("country", "flag");
+            Iterator it = countryFlags.iterator();
+            // For each flag calculate the % of colors and add the result to the Flags table
+            while (it.hasNext()){
+                String flagImage = (String) it.next();
+                FlagColors flagColors = findColorPercentageOfImage(Constants.USER_PATH + "/flags/" + flagImage);
+                if (flagColors != null){
+                    dbManager.insertValuesIntoFlagTable(flagImage, flagColors.getRed(), flagColors.getOrange(),
+                            flagColors.getYellow(), flagColors.getGreen_1(), flagColors.getGreen_2(), flagColors.getGreen_3(),
+                            flagColors.getBlue_1(), flagColors.getBlue_2(), flagColors.getBlue_3(), flagColors.getIndigo(),
+                            flagColors.getPink(), flagColors.getMagenta(), flagColors.getBlack(), flagColors.getWhite());
                 }
             }
-        });
+        }
     }
 
     //region PRIVATE METHODS
@@ -182,12 +180,14 @@ public class Controller implements IController {
      * Checks if the database is created and filled
      */
     private void checkDatabases(){
-        // Check to see if databases are created
-        if (!dbManager.tableExists(Constants.TABLE_COUNTRY)){
-            // If not, create tables Country and Flags
-            dbManager.insertValuesIntoCountryTable();
-        }
-        loadFlagsTable();
+        executor.submit(() ->{
+            // Check to see if databases are created
+            if (!dbManager.tableExists(Constants.TABLE_COUNTRY)){
+                // If not, create tables Country and Flags
+                dbManager.insertValuesIntoCountryTable();
+            }
+            loadFlagsTable();
+        });
     }
 
     /**
